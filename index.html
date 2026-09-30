@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>T7 Ride Check</title>
+<meta name="theme-color" content="#1f2a33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow column sized for a phone in a gloved hand; sticky status header, T-CLOCS sections, big three-way toggles. */
+:root {
+  --bg: #eef1f3;
+  --surface: #ffffff;
+  --fg: #1c252c;
+  --muted: #5d6b76;
+  --line: #d3dae0;
+  --accent: #d9531e;
+  --accent-fg: #ffffff;
+  --ok: #1f8a4c;
+  --ok-soft: #dcf2e5;
+  --fix: #c2410c;
+  --fix-soft: #fde6d8;
+  --na: #6b7682;
+  --na-soft: #e6eaed;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "Roboto Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12181d; --surface: #1b242b; --fg: #e6ebef; --muted: #98a6b1; --line: #2c3842;
+    --accent: #f06a33; --accent-fg: #14100d;
+    --ok: #4cc27f; --ok-soft: #173325; --fix: #f5884f; --fix-soft: #3a2116; --na: #9aa6b0; --na-soft: #26313a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12181d; --surface: #1b242b; --fg: #e6ebef; --muted: #98a6b1; --line: #2c3842;
+  --accent: #f06a33; --accent-fg: #14100d;
+  --ok: #4cc27f; --ok-soft: #173325; --fix: #f5884f; --fix-soft: #3a2116; --na: #9aa6b0; --na-soft: #26313a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.45; margin: 0; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 40px; }
+
+header.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  padding-block: 12px 10px;
+}
+.bar-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; letter-spacing: .01em; margin: 0; line-height: 1; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.count { font-family: var(--font-data); font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.meter { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--line); margin-top: 10px; }
+.meter i { display: block; height: 100%; transition: width .2s; }
+.meter .m-ok { background: var(--ok); }
+.meter .m-fix { background: var(--fix); }
+.meter .m-na { background: var(--na); }
+
+.trip { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+label, .lbl { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+input, select, textarea {
+  font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; width: 100%; min-width: 0;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.inline { display: flex; gap: 6px; }
+.inline select { width: auto; flex: none; }
+
+section.group { margin-top: 26px; }
+.group-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.letter { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; color: var(--accent); width: 1.1em; text-align: center; line-height: 1; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.3rem; margin: 0; letter-spacing: .02em; }
+.group-count { margin-left: auto; font-family: var(--font-data); font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.items { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.item { padding: 12px 12px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); border-left: 4px solid transparent; }
+.item:first-child { border-top: 0; }
+.item[data-s="ok"] { border-left-color: var(--ok); }
+.item[data-s="fix"] { border-left-color: var(--fix); background: var(--fix-soft); }
+.item[data-s="na"] { border-left-color: var(--na); }
+.item-text { min-width: 0; }
+.item-label { font-weight: 600; }
+.item-hint { font-size: .86rem; color: var(--muted); }
+.item-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reading { display: flex; align-items: center; gap: 6px; flex: 1 1 120px; min-width: 0; }
+.reading input { font-family: var(--font-data); font-variant-numeric: tabular-nums; padding: 8px 10px; max-width: 110px; }
+.reading .unit { font-family: var(--font-data); font-size: .85rem; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-left: auto; }
+.seg button {
+  font: inherit; font-weight: 600; font-size: .9rem; min-width: 58px; min-height: 44px; padding: 0 10px;
+  border: 0; background: var(--surface); color: var(--muted); cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"].b-ok { background: var(--ok); color: #fff; }
+.seg button[aria-pressed="true"].b-fix { background: var(--fix); color: #fff; }
+.seg button[aria-pressed="true"].b-na { background: var(--na); color: var(--bg); }
+.item textarea { min-height: 44px; font-size: .95rem; }
+
+.result { margin-top: 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.verdict { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+.verdict.go { color: var(--ok); }
+.verdict.stop { color: var(--fix); }
+.verdict.wait { color: var(--muted); }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn {
+  font: inherit; font-weight: 600; min-height: 48px; border-radius: 10px; padding: 0 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+.btn.primary { grid-column: 1 / -1; background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-size: 1.05rem; }
+.btn.danger { color: var(--fix); }
+.note { font-size: .88rem; color: var(--muted); margin: 0; }
+.confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--fix-soft); }
+.confirm p { margin: 0; flex: 1 1 180px; }
+
+details.history { margin-top: 22px; }
+details.history summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; }
+.hist-list { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.hist-list li { display: flex; justify-content: space-between; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-size: .92rem; }
+.hist-list .d { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.pill { font-size: .78rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.pill.go { background: var(--ok-soft); color: var(--ok); }
+.pill.stop { background: var(--fix-soft); color: var(--fix); }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 10; max-width: calc(100% - 32px); }
+textarea.copybox { font-family: var(--font-data); font-size: .8rem; min-height: 160px; }
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="bar-row">
+      <h1>T7 <span>Ride Check</span></h1>
+      <span class="count" id="count">0 / 0</span>
+    </div>
+    <div class="meter" aria-hidden="true"><i class="m-ok" id="m-ok"></i><i class="m-fix" id="m-fix"></i><i class="m-na" id="m-na"></i></div>
+  </header>
+
+  <div class="trip">
+    <div class="field">
+      <label for="f-date">Date</label>
+      <input id="f-date" type="date">
+    </div>
+    <div class="field">
+      <label for="f-rider">Rider</label>
+      <input id="f-rider" type="text" placeholder="Your name" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="f-odo">Odometer</label>
+      <div class="inline">
+        <input id="f-odo" type="number" inputmode="numeric" placeholder="12450">
+        <select id="f-odo-unit" aria-label="Distance unit"><option>km</option><option>mi</option></select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-punit">Tire pressure unit</label>
+      <select id="f-punit"><option>psi</option><option>bar</option><option>kPa</option></select>
+    </div>
+  </div>
+
+  <div id="groups"></div>
+
+  <div class="field wide" style="margin-top:24px">
+    <label for="f-notes">Notes for this ride</label>
+    <textarea id="f-notes" rows="3" placeholder="Route, luggage, anything to watch"></textarea>
+  </div>
+
+  <div class="result" id="result">
+    <div class="verdict wait" id="verdict">Not finished</div>
+    <p class="note" id="verdict-sub"></p>
+    <div class="actions" id="actions">
+      <button class="btn primary" id="b-share" type="button">Save to Google Drive</button>
+      <button class="btn" id="b-download" type="button">Download file</button>
+      <button class="btn" id="b-copy" type="button">Copy text</button>
+      <button class="btn danger" id="b-new" type="button" style="grid-column:1/-1">Start a new check</button>
+    </div>
+    <p class="note" id="share-note" hidden>To save straight to Google Drive, open this page in Chrome on your phone and tap Save. Inside this preview, use Copy text and paste it into a Google Doc.</p>
+    <div class="confirm" id="confirm" hidden>
+      <p>Clear today's answers? Your saved history stays.</p>
+      <button class="btn" id="b-cancel" type="button">Keep</button>
+      <button class="btn danger" id="b-clear" type="button">Clear</button>
+    </div>
+    <textarea class="copybox" id="copybox" readonly hidden aria-label="Checklist report"></textarea>
+  </div>
+
+  <details class="history" id="history">
+    <summary>Past checks</summary>
+    <ul class="hist-list" id="hist-list"></ul>
+    <p class="note" id="hist-empty">Checks you save or share appear here, on this phone only.</p>
+  </details>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const GROUPS = [
+  { key: "T", name: "Tires & wheels", items: [
+    { id: "p-front", label: "Front tire pressure", hint: "Cold, before riding. Compare to your owner's manual.", reading: "pressure" },
+    { id: "p-rear", label: "Rear tire pressure", hint: "Higher with a passenger or full luggage.", reading: "pressure" },
+    { id: "tread", label: "Tread and sidewalls", hint: "Wear, cuts, bulges, nails or stones." },
+    { id: "spokes", label: "Spokes and rims", hint: "Tap spokes for a dull note. Look for rim dents." },
+    { id: "bearings", label: "Wheel bearings", hint: "Rock each wheel side to side. No play." }
+  ]},
+  { key: "C", name: "Controls", items: [
+    { id: "throttle", label: "Throttle", hint: "Snaps closed at full left and right lock." },
+    { id: "clutch", label: "Clutch lever and cable", hint: "Free play at the lever. Cable not kinked." },
+    { id: "fbrake", label: "Front brake lever", hint: "Firm, not spongy. Does not reach the grip." },
+    { id: "rbrake", label: "Rear brake pedal", hint: "Firm with normal travel." },
+    { id: "mirrors", label: "Mirrors", hint: "Tight and adjusted." },
+    { id: "horn", label: "Horn", hint: "" }
+  ]},
+  { key: "L", name: "Lights & electrics", items: [
+    { id: "head", label: "Headlight low and high beam", hint: "" },
+    { id: "tail", label: "Tail and brake light", hint: "Check with both the lever and the pedal." },
+    { id: "signals", label: "Turn signals and hazards", hint: "Front and rear, both sides." },
+    { id: "dash", label: "Dash warnings", hint: "No warning lights after start-up." }
+  ]},
+  { key: "O", name: "Oil & fluids", items: [
+    { id: "oil", label: "Engine oil level", hint: "Sight glass on the right side, bike upright and level." },
+    { id: "coolant", label: "Coolant reservoir", hint: "Between the lower and upper marks." },
+    { id: "bfluid", label: "Brake fluid, front and rear", hint: "Above minimum in both reservoirs." },
+    { id: "leaks", label: "No leaks", hint: "Look under the bike, fork seals, and shock." },
+    { id: "fuel", label: "Fuel", hint: "Enough for the planned route." }
+  ]},
+  { key: "C", name: "Chassis & chain", items: [
+    { id: "chain", label: "Chain slack", hint: "On the side stand, within the manual's spec.", reading: "mm" },
+    { id: "lube", label: "Chain lubed, sprockets OK", hint: "No hooked or worn teeth." },
+    { id: "susp", label: "Fork and shock", hint: "Smooth compression. No oil on the fork tubes." },
+    { id: "bolts", label: "Luggage, racks and skid plate", hint: "Everything tight and secure." }
+  ]},
+  { key: "S", name: "Stands", items: [
+    { id: "stand", label: "Side stand", hint: "Spring snaps up. Engine cuts out if you select a gear with the stand down." }
+  ]},
+  { key: "R", name: "Rider & kit", items: [
+    { id: "gear", label: "Helmet, gloves, jacket, boots", hint: "" },
+    { id: "docs", label: "License, registration, insurance", hint: "" },
+    { id: "tools", label: "Tools and tire repair kit", hint: "Plugs or patches, pump, tire levers." },
+    { id: "phone", label: "Phone charged, route loaded", hint: "" }
+  ]}
+];
+const ALL = GROUPS.flatMap(g => g.items);
+const LABELS = { ok: "OK", fix: "Fix", na: "N/A" };
+const DRAFT_KEY = "t7check.draft", HIST_KEY = "t7check.history", PREF_KEY = "t7check.prefs";
+const $ = id => document.getElementById(id);
+
+function load(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; } }
+function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+function today() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+
+let prefs = load(PREF_KEY, { rider: "", odoUnit: "km", pUnit: "psi" });
+let state = load(DRAFT_KEY, null) || blank();
+function blank() { return { date: today(), odo: "", notes: "", items: {} }; }
+function item(id) { return state.items[id] || (state.items[id] = { s: "", note: "", val: "" }); }
+
+function render() {
+  const host = $("groups");
+  host.innerHTML = "";
+  GROUPS.forEach((g, gi) => {
+    const sec = document.createElement("section");
+    sec.className = "group";
+    sec.innerHTML = `<div class="group-head"><span class="letter">${g.key}</span><h2>${g.name}</h2><span class="group-count" id="gc-${gi}"></span></div><div class="items"></div>`;
+    const list = sec.querySelector(".items");
+    g.items.forEach(it => {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.id = "row-" + it.id;
+      const unit = it.reading === "pressure" ? prefs.pUnit : it.reading;
+      row.innerHTML = `
+        <div class="item-text"><div class="item-label">${it.label}</div>${it.hint ? `<div class="item-hint">${it.hint}</div>` : ""}</div>
+        <div class="item-controls">
+          ${it.reading ? `<span class="reading"><input id="val-${it.id}" type="number" inputmode="decimal" step="any" aria-label="${it.label} reading"><span class="unit" data-unit="${it.reading}">${unit}</span></span>` : ""}
+          <span class="seg" role="group" aria-label="${it.label}">
+            ${["ok", "fix", "na"].map(s => `<button type="button" class="b-${s}" data-id="${it.id}" data-s="${s}" aria-pressed="false">${LABELS[s]}</button>`).join("")}
+          </span>
+        </div>
+        <textarea id="note-${it.id}" rows="1" placeholder="What needs fixing?" hidden></textarea>`;
+      list.appendChild(row);
+    });
+    host.appendChild(sec);
+  });
+  host.addEventListener("click", e => {
+    const b = e.target.closest("button[data-s]");
+    if (!b) return;
+    const it = item(b.dataset.id);
+    it.s = it.s === b.dataset.s ? "" : b.dataset.s;
+    save(); paint();
+    if (it.s === "fix") $("note-" + b.dataset.id).focus();
+  });
+  host.addEventListener("input", e => {
+    const t = e.target;
+    if (t.id.startsWith("val-")) item(t.id.slice(4)).val = t.value;
+    if (t.id.startsWith("note-")) item(t.id.slice(5)).note = t.value;
+    save(); paint();
+  });
+}
+
+function paint() {
+  let ok = 0, fix = 0, na = 0;
+  ALL.forEach(it => {
+    const st = item(it.id);
+    const row = $("row-" + it.id);
+    row.dataset.s = st.s;
+    row.querySelectorAll("button[data-s]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === st.s)));
+    const note = $("note-" + it.id);
+    note.hidden = st.s !== "fix";
+    if (note.value !== st.note) note.value = st.note;
+    const v = $("val-" + it.id);
+    if (v && v.value !== st.val) v.value = st.val;
+    if (st.s === "ok") ok++; else if (st.s === "fix") fix++; else if (st.s === "na") na++;
+  });
+  document.querySelectorAll('.unit[data-unit="pressure"]').forEach(u => u.textContent = prefs.pUnit);
+  GROUPS.forEach((g, gi) => {
+    const done = g.items.filter(it => item(it.id).s).length;
+    $("gc-" + gi).textContent = `${done}/${g.items.length}`;
+  });
+  const total = ALL.length, done = ok + fix + na;
+  $("count").textContent = `${done} / ${total} checked`;
+  $("m-ok").style.width = (ok / total * 100) + "%";
+  $("m-fix").style.width = (fix / total * 100) + "%";
+  $("m-na").style.width = (na / total * 100) + "%";
+  const v = $("verdict"), sub = $("verdict-sub");
+  if (fix) { v.className = "verdict stop"; v.textContent = fix === 1 ? "1 item needs fixing" : `${fix} items need fixing`; sub.textContent = "Sort these out before you ride."; }
+  else if (done < total) { v.className = "verdict wait"; v.textContent = `${total - done} left to check`; sub.textContent = "You can still save a partial check."; }
+  else { v.className = "verdict go"; v.textContent = "Ready to ride"; sub.textContent = "Every item is checked. Save a copy to Drive."; }
+}
+
+function syncTrip() {
+  $("f-date").value = state.date || today();
+  $("f-odo").value = state.odo || "";
+  $("f-notes").value = state.notes || "";
+  $("f-rider").value = prefs.rider || "";
+  $("f-odo-unit").value = prefs.odoUnit;
+  $("f-punit").value = prefs.pUnit;
+}
+function save() { store(DRAFT_KEY, state); }
+
+["f-date", "f-odo", "f-notes"].forEach(id => $(id).addEventListener("input", e => {
+  state[{ "f-date": "date", "f-odo": "odo", "f-notes": "notes" }[id]] = e.target.value; save();
+}));
+$("f-rider").addEventListener("input", e => { prefs.rider = e.target.value; store(PREF_KEY, prefs); });
+$("f-odo-unit").addEventListener("change", e => { prefs.odoUnit = e.target.value; store(PREF_KEY, prefs); });
+$("f-punit").addEventListener("change", e => { prefs.pUnit = e.target.value; store(PREF_KEY, prefs); paint(); });
+
+function summary() {
+  const fix = ALL.filter(it => item(it.id).s === "fix").length;
+  const left = ALL.filter(it => !item(it.id).s).length;
+  return fix ? `${fix} TO FIX` : left ? `${left} NOT CHECKED` : "READY TO RIDE";
+}
+function report() {
+  const now = new Date();
+  const time = now.toTimeString().slice(0, 5);
+  const lines = [
+    "T7 DAILY RIDE CHECK",
+    "===================",
+    `Date:     ${state.date || today()} ${time}`,
+    `Rider:    ${prefs.rider || "-"}`,
+    `Odometer: ${state.odo ? state.odo + " " + prefs.odoUnit : "-"}`,
+    `Result:   ${summary()}`,
+    ""
+  ];
+  GROUPS.forEach(g => {
+    lines.push(`${g.key} - ${g.name.toUpperCase()}`);
+    g.items.forEach(it => {
+      const st = item(it.id);
+      const tag = st.s ? `[${LABELS[st.s]}]`.padEnd(6) : "[ -- ]";
+      const unit = it.reading === "pressure" ? prefs.pUnit : it.reading;
+      let line = `  ${tag} ${it.label}`;
+      if (st.val) line += ` (${st.val} ${unit})`;
+      lines.push(line);
+      if (st.s === "fix" && st.note) lines.push(`         > ${st.note}`);
+    });
+    lines.push("");
+  });
+  if (state.notes) lines.push("NOTES", state.notes, "");
+  return lines.join("\n");
+}
+function fileName() { return `T7-ride-check-${state.date || today()}.txt`; }
+
+function addHistory() {
+  const hist = load(HIST_KEY, []);
+  const entry = { at: Date.now(), date: state.date || today(), odo: state.odo, unit: prefs.odoUnit, result: summary() };
+  const last = hist[0];
+  if (last && last.date === entry.date && last.result === entry.result && last.odo === entry.odo) hist[0] = entry;
+  else hist.unshift(entry);
+  store(HIST_KEY, hist.slice(0, 30));
+  paintHistory();
+}
+function paintHistory() {
+  const hist = load(HIST_KEY, []);
+  $("hist-empty").hidden = hist.length > 0;
+  $("hist-list").innerHTML = hist.map(h => `<li><span class="d">${h.date}${h.odo ? ` · ${h.odo} ${h.unit}` : ""}</span><span class="pill ${h.result === "READY TO RIDE" ? "go" : "stop"}">${h.result.toLowerCase()}</span></li>`).join("");
+}
+
+let toastTimer;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2600); }
+
+let embedded = true;
+try { embedded = window.self !== window.top; } catch (e) {}
+if (embedded) {
+  $("b-share").hidden = true; $("b-download").hidden = true;
+  $("b-copy").classList.add("primary");
+  $("share-note").hidden = false;
+}
+
+$("b-share").addEventListener("click", async () => {
+  const text = report();
+  const file = new File([text], fileName(), { type: "text/plain" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: fileName() });
+      addHistory(); toast("Sent. Pick Drive in the share menu to save it there.");
+    } catch (e) { if (e.name !== "AbortError") toast("Sharing did not work. Try Download file."); }
+  } else {
+    download(text); toast("Sharing isn't available here, so the file was downloaded.");
+  }
+});
+function download(text) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = fileName();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  addHistory();
+}
+$("b-download").addEventListener("click", () => { download(report()); toast("Downloaded " + fileName()); });
+$("b-copy").addEventListener("click", () => {
+  const text = report();
+  const box = $("copybox");
+  const fallback = () => { box.value = text; box.hidden = false; box.focus(); box.select(); toast("Select all and copy the text below."); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => { addHistory(); toast("Copied. Paste it into a Google Doc."); }, fallback);
+  } else fallback();
+});
+$("b-new").addEventListener("click", () => { $("confirm").hidden = false; });
+$("b-cancel").addEventListener("click", () => { $("confirm").hidden = true; });
+$("b-clear").addEventListener("click", () => {
+  state = blank(); save(); syncTrip(); paint();
+  $("confirm").hidden = true; $("copybox").hidden = true;
+  window.scrollTo({ top: 0 }); toast("New check started");
+});
+
+render(); syncTrip(); paint(); paintHistory();
+</script>
+</body>
+</html>
