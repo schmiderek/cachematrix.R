@@ -1,9 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#e8602c"/>
-  <g fill="#1a2127"><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(0.00 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(16.36 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(32.73 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(49.09 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(65.45 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(81.82 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(98.18 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(114.55 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(130.91 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(147.27 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(163.64 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(180.00 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(196.36 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(212.73 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(229.09 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(245.45 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(261.82 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(278.18 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(294.55 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(310.91 256 256)"/><rect x="241.0" y="62" width="30" height="38" rx="5" transform="rotate(327.27 256 256)"/><rect x="241.0" y="72" width="30" height="28" rx="5" transform="rotate(343.64 256 256)"/></g>
-  <circle cx="256" cy="256" r="136" fill="none" stroke="#1a2127" stroke-width="56"/>
-  <g stroke="#2e3a44" stroke-width="6" stroke-linecap="round"><line x1="256" y1="100" x2="256" y2="124" transform="rotate(8.18 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(24.55 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(40.91 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(57.27 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(73.64 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(90.00 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(106.36 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(122.73 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(139.09 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(155.45 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(171.82 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(188.18 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(204.55 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(220.91 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(237.27 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(253.64 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(270.00 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(286.36 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(302.73 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(319.09 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(335.45 256 256)"/><line x1="256" y1="100" x2="256" y2="124" transform="rotate(351.82 256 256)"/></g>
-  <circle cx="256" cy="256" r="104" fill="none" stroke="#c9d2d9" stroke-width="12"/>
-  <circle cx="256" cy="256" r="101" fill="#26343f"/>
-  <polyline points="202,260 240,297 312,218" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="ti" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a7adb3"/>
+      <stop offset="0.38" stop-color="#7d848b"/>
+      <stop offset="0.55" stop-color="#9aa1a8"/>
+      <stop offset="1" stop-color="#5c636a"/>
+    </linearGradient>
+    <pattern id="brush" width="512" height="6" patternUnits="userSpaceOnUse">
+      <rect y="0" width="512" height="1" fill="#ffffff" opacity="0.07"/>
+      <rect y="3" width="512" height="1" fill="#000000" opacity="0.05"/>
+    </pattern>
+    <linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a3137"/>
+      <stop offset="1" stop-color="#15191d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#ti)"/>
+  <rect width="512" height="512" fill="url(#brush)"/>
+  <g transform="translate(256 256) scale(0.9) skewX(-10) translate(-256 -256)">
+    <g fill="url(#ink)">
+      <polygon points="110,150 252,150 252,192 202,192 202,340 158,340 158,192 110,192"/>
+      <polygon points="266,150 404,150 404,190 318,340 270,340 352,192 266,192"/>
+    </g>
+    <polygon points="110,366 404,366 398,392 104,392" fill="#e8602c"/>
+  </g>
 </svg>
